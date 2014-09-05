@@ -85,7 +85,7 @@ def user(request, username):
         group by u.id, s.month, s.year
     ) sq2 on sq1.month = sq2.month and sq1.year = sq2.year
         where sq1.ts >= sq2.ts
-        group by sq1.month, sq1.year
+        group by sq1.month, sq1.year, sq2.ts
         order by sq1.year desc, sq1.month desc;
     """, [thisuser.id])
     monthscores = cursor.fetchall()
