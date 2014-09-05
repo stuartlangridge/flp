@@ -3,3 +3,6 @@ venv
 staticfiles
 .env
 .env
+flp.db
+reinit.sh
+sqlexperiment
