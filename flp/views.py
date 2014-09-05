@@ -2,13 +2,21 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 from .models import Blog, Score, Post, User2Score, User2Blog
 from django.conf import settings
-import datetime, re
+import datetime, re, os
 from django.db import connection
 from django.template.context import RequestContext
 from django.db.models import Q, Max, Sum
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 import flp.common
+
+def fetchfeeds(request):
+    secret = request.GET.get("secret")
+    if secret and secret == os.environ.get("FETCHFEEDS_SECRET"):
+        from django.core.management import call_command
+        call_command('fetchfeeds')
+        return HttpResponse("done.")
+    return HttpResponse("you fail.")
 
 def index(request):
     now = datetime.datetime.now()
