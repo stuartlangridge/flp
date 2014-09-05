@@ -16,5 +16,5 @@ requests-oauthlib==0.4.0
 six==1.7.3
 static3==0.5.1
 twython==3.1.2
--e git://github.com/ryanmcgrath/twython-django.git#egg=twython-django
+-e git://github.com/stuartlangridge/twython-django.git@patch-1#egg=twython-django
 wsgiref==0.1.2
