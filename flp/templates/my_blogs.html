@@ -17,10 +17,12 @@
     <li>
     <input type="checkbox" name="chosen_{{blog.id}}" id="chosen_{{blog.id}}"
     {% if blog.my_price %}checked{% endif %}>
-    <label for="chosen_{{blog.id}}">{{blog.name}}</a> 
+    <label for="chosen_{{blog.id}}"><strong>{{blog.name}}</strong>
         <span>{{blog.price}}</span>
         {% if blog.my_price %}
+        {% if blog.my_price != blog.price %}
         <em>(bought for <em>{{blog.my_price}}</em>)</em>
+        {% endif %}
         {% endif %}
     </label>
     </li>
@@ -124,6 +126,7 @@ ul#choose {
     margin: 0;
     display: block;
     overflow: auto;
+    position: relative;
 }
 #choose li:nth-child(2n+1) {
     background: #f7f6f5;
@@ -134,10 +137,24 @@ ul#choose {
     width: 90%;
     float: left;
 }
+#choose label strong {
+    width: 55%;
+    float: left;
+    font-weight: 100;
+    padding-left: 5px;
+}
 #choose label span {
     width: 40%;
     max-width: 100px;
     float: right;
+    padding-right: 5px;
+    text-align: right;
+}
+#choose label > em {
+    position: absolute;
+    bottom: 3px;
+    right: 10px;
+    font-size: 8px;
 }
 #choose input[type=checkbox] {
     width: 9%;
