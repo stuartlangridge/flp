@@ -20,7 +20,7 @@ def index(request):
         from flp_score s inner join flp_post p on s.post_id=p.id 
         inner join flp_blog b on p.blog_id=b.id group by p.blog_id, 
         b.name, s.month, s.year
-        ) sq group by sq.blog_id order by avg(sq.total) desc;""")
+        ) sq group by sq.blog_id, sq.name order by avg(sq.total) desc;""")
     top_blogs_ever = cursor.fetchall()[:5]
 
     authors = dict([
