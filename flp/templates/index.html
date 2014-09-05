@@ -17,7 +17,7 @@
 <h2>Leading users this month so far</h2>
 <ul>
     {% for umc in highest_scorers_this_month %}
-    <li><a href="{% url 'user' umc.user__id %}">{{ umc.user__username }}</a> <span>{{ umc.total }}</span></li>
+    <li><a href="{% url 'user' umc.user__username %}">{{ umc.user__username }}</a> <span>{{ umc.total }}</span></li>
     {% endfor %}
 </ul>
 </div>
