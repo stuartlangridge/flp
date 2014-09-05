@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block content %}
+<p>This is <strong>Fantasy League Planet Birmingham</strong>! Basically, you get {{ budget|intcomma }} virtual pounds to buy a selection of five blogs from <a href="http://planet.birmingham.io/">Planet Birmingham</a>, and then whenever your blogs post or get linked to you get points. Encourage your friends to sign up and then mock them when you score more than they do!</p>
+<p>{% if user and not user.is_anonymous %}You can <a href="{% url 'my-blogs' %}">{% ifequal my_blogs|length 5 %}edit your chosen blogs now{% else %}choose your five blogs now{% endifequal %}</a>{% else %}Simply <a href="{% url 'twitter_login' %}">sign in with Twitter to get started</a>{% endif %}.
+
+<div class="box">
+<h2>Top blogs this month</h2>
+<ul>
+    {% for item in top_blogs_this_month %}
+    <li><a href="{% url 'blog' item.post__blog__id %}">{{ item.post__blog__name }}</a> <span>{{ item.total }}</span></li>
+    {% endfor %}
+</ul>
+</div>
+
+<div class="box">
+<h2>Leading users this month so far</h2>
+<ul>
+    {% for umc in highest_scorers_this_month %}
+    <li><a href="{% url 'user' umc.user__id %}">{{ umc.user__username }}</a> <span>{{ umc.total }}</span></li>
+    {% endfor %}
+</ul>
+</div>
+
+<div class="box">
+<h2>Top blogs ever</h2>
+<ul>
+    {% for item in top_blogs_ever %}
+    <li><a href="{% url 'blog' item.1 %}">{{ item.2 }}</a> <span>{{ item.0|floatformat }}</span></li>
+    {% endfor %}
+</ul>
+</div>
+
+<div class="allblogs">
+
+<p>You can choose from all the blogs on <a href="http://planet.birmingham.io/">Planet Birmingham</a>, and they're great. In addition to playing games, you should read them all. Thank you to everyone who lets us read and play: 
+    {% regroup authors|dictsort:"blogname" by blogid as blogauthors %}
+    {% for byblog in blogauthors %}
+        {% if forloop.last %} and {% endif %}
+        {% for detail in byblog.list|dictsort:"author" %}
+            {% if forloop.last and byblog.list|length > 1 %} and {% endif %}{{ detail.author }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+        from <a href="{% url 'blog' byblog.grouper %}">{{ byblog.list.0.blogname }}</a>{% if not forloop.last %}, {% else %}.{% endif %}
+    {% endfor %}
+
+</p>
+</div>
+{% endblock %}
+
+{% block style %}
+.box {
+    border: 1px solid #666;
+    width: 200px;
+    float: left;
+    height: 20em;
+    overflow: hidden;
+    margin: 0 1em 1em 0;
+}
+.box h2 {
+    margin: 0;
+    font-size: 15px;
+    text-align: center;
+    background: #666;
+    color: #eee;
+    height: 3em;
+    padding: 6px;
+}
+.box ul {
+    margin: 10px 0 0 0;
+    padding: 0;
+}
+.box li {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 12px;
+    overflow: auto;
+    display: block;
+}
+.box li a {
+    float: left;
+    height: 4em;
+    width: 140px;
+    display: block;
+    border-bottom: 1px dotted #666;
+    overflow: hidden;
+    padding: 0 10px;
+}
+.box li span {
+    float: right;
+    height: 4em;
+    width: 40px;
+    display: block;
+    text-align: center;
+    border-bottom: 1px dotted black;
+}
+.box li:last-child a, .box li:last-child span { border-width: 0; }
+.allblogs {
+    clear: left;
+    padding-top: 8em;
+    font-size: 0.8em;
+}
+{% endblock %}

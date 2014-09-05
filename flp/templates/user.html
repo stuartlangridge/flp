@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load months %}
+{% load humanize %}
+{% block title %}{{ thisuser.username }}{% endblock %}
+{% block content %}
+<h2><img src="http://twitter.com/api/users/profile_image/{{ thisuser.username }}"> {{ thisuser.username }}</h2>
+<p class="banner">Current score for {{ thismonthscore.month|month_name }} {{ thismonthscore.year }}: {{ thismonthscore.total }}</p>
+<p class="banner">That puts 
+{% ifequal thisuser.username user.username %}you{%else%}{{ thisuser.username }}{% endifequal %}
+{% if thismonthscore.position == 1 %}in the lead!{% elif thismonthscore.position == 0 %}in last place :-({% else %}in 
+{{ thismonthscore.position|ordinal }} place!{% endif %}</p>
+
+<h3>Scores for 
+{% ifequal thisuser.username user.username %}you{%else%}{{ thisuser.username }}{% endifequal %}
+ this month so far</h3>
+<table class="score_snippet">
+    {% for score in individual_scores %}
+    {% include "score_snippet.html" with score=score %}
+    {% endfor %}
+</table>
+<h3>History</h3>
+<table class="score_snippet">
+{% for ms in monthscores %}
+    <tr>
+        <td>{{ms.1|month_name}} {{ms.2}}</td>
+        <td>{{ ms.3 }}</td>
+        <td>{% if ms.0 == 0 %}last{%else%}{{ ms.0|ordinal }}{%endif%} place</td>
+    </tr>
+{% endfor %}
+</table>
+{% endblock %}
+{% block style %}
+h2 img {
+    height: 48px;
+    vertical-align: middle;
+}
+h2 {
+    height: 48px;
+    line-height: 48px;
+}
+
+{% endblock %}

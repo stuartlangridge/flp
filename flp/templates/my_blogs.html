@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block title %}My blogs{% endblock %}
+{% block content %}
+
+{% for err in errors %}
+<p class="error">{{ err }}</p>
+{% endfor %}
+
+<form method="POST">
+{% csrf_token %}
+<p id="spent">Total spent: <span id="totalmoney">0</span> on <span id="totalblogs">0</span> blogs</p>
+<input type="submit" value="Choose these blogs" disabled data-title="You must choose five blogs"
+    title="You must choose five blogs">
+
+<ul id="choose">
+    {% for blog in bloglist|dictsortreversed:"price" %}
+    <li>
+    <input type="checkbox" name="chosen_{{blog.id}}" id="chosen_{{blog.id}}"
+    {% if blog.my_price %}checked{% endif %}>
+    <label for="chosen_{{blog.id}}">{{blog.name}}</a> 
+        <span>{{blog.price}}</span>
+        {% if blog.my_price %}
+        <em>(bought for <em>{{blog.my_price}}</em>)</em>
+        {% endif %}
+    </label>
+    </li>
+    {% endfor %}
+</ul>
+</form>
+{% endblock %}
+
+{% block script %}
+function updateTotals() {
+    var chosen = document.querySelectorAll("input:checked");
+    var prices = document.querySelectorAll("input:checked + label span");
+    var price = 0;
+    Array.prototype.slice.call(prices).forEach(function(p) {
+        var nprice;
+        var boughtfor = p.parentNode.querySelector("em em");
+        if (boughtfor) {
+            nprice = parseInt(boughtfor.firstChild.nodeValue, 10);
+        } else {
+            nprice = parseInt(p.firstChild.nodeValue, 10);
+        }
+        if (isNaN(nprice)) nprice = 100000;
+        price += nprice;
+    });
+    if (price > MAX_PRICE) {
+        return false;
+    }
+    document.querySelector("#totalmoney").innerHTML = price;
+    document.querySelector("#totalblogs").innerHTML = chosen.length;
+    var remaining_price = MAX_PRICE - price;
+    cbs.forEach(function(cb) {
+        var nprice = parseInt(cb.parentNode.getElementsByTagName("span")[0].firstChild.nodeValue, 10);
+        if (isNaN(nprice)) nprice = 100000;
+        if (cb.checked) {
+            cb.disabled = false;
+        } else {
+            cb.disabled = nprice > remaining_price;
+        }
+    });
+    var sub = document.querySelector("input[type=submit]");
+    if (chosen.length == 5) {
+        sub.setAttribute("data-title", sub.getAttribute("title"));
+        sub.setAttribute("title", "");
+        sub.disabled = false;
+    } else {
+        sub.setAttribute("title", sub.getAttribute("data-title"));
+        sub.disabled = true;
+    }
+    return true;
+}
+function flash(el) {
+    el.classList.add("flash");
+    setTimeout(function() { el.classList.add("flash-start"); }, 50);
+    setTimeout(function() { el.classList.remove("flash"); }, 70);
+    setTimeout(function() { el.classList.remove("flash-start"); }, 2000);
+}
+var MAX_PRICE = {{ budget }};
+var cbs = Array.prototype.slice.call(document.querySelectorAll("input[type=checkbox]"));
+cbs.forEach(function(c) {
+    c.onchange = function(e) {
+        var chosen = document.querySelectorAll("input:checked");
+        if (chosen.length >= 6) {
+            c.checked = false;
+            c.blur();
+            flash(document.querySelector("#totalblogs")); 
+            return;
+        }
+        var sub = document.querySelector("input[type=submit]");
+        if (chosen.length == 5) {
+            sub.setAttribute("data-title", sub.getAttribute("title"));
+            sub.setAttribute("title", "");
+            sub.disabled = false;
+        } else {
+            sub.setAttribute("title", sub.getAttribute("data-title"));
+            sub.disabled = true;
+        }
+        lastAdded = c.parentNode.getElementsByTagName("label")[0];
+        var isok = updateTotals();
+        if (!isok) {
+            flash(document.querySelector("#totalmoney"));
+            c.checked = false;
+            c.blur();
+            return;
+        }
+    };
+});
+updateTotals();
+{% endblock %}
+
+{% block style %}
+ul#choose {
+    margin: 0 auto;
+    padding: 0;
+    width: 70%;
+    -webkit-column: 15em;
+    -moz-columns: 15em;
+    columns: 15em;
+}
+#choose li {
+    list-style: none;
+    margin: 0;
+    display: block;
+    overflow: auto;
+}
+#choose li:nth-child(2n+1) {
+    background: #f7f6f5;
+}
+#choose label {
+    padding: 1em 0;
+    display: block;
+    width: 90%;
+    float: left;
+}
+#choose label span {
+    width: 40%;
+    max-width: 100px;
+    float: right;
+}
+#choose input[type=checkbox] {
+    width: 9%;
+    margin: 1em 0;
+    display: block;
+    float: left;
+    overflow: hidden;
+}
+#choose input:checked + label { 
+    background: #ada;
+}
+#choose input:disabled + label { 
+    background: #666;
+}
+.flash {
+    background-color: red !important;
+}
+.flash-start {
+    -moz-transition:background-color 2s;
+    -webkit-transition:background-color 2s;
+    -o-transition:background-color 2s;
+    transition:background-color 2s;
+}
+p.error {
+    border: 3px solid red;
+    padding: 8px;
+    background: #fee;
+}
+{% endblock %}

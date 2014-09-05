@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{{ blog.name }}{% endblock %}
+{% block content %}
+<h2>{{ blog.name }} (<a href="{{blog.url}}">visit site</a>)</h2>
+<p class="banner">Total score this month: {{ total_score_this_month }}</p>
+<p>Currently {{ blog.name }} is in
+    {% ifequal subscribers|length 0 %}nobody's team{% else %}{% for u in subscribers %}{% if not forloop.last %} and {% endif %}{{ u.username }}'s{% if not forloop.last %}, {% endif %}{% endfor %} team{{ subscribers|length|pluralize}}{% endifequal %}.
+</p>
+<h2>Score history</h2>
+{% regroup all_scores_by_date by post.date|date:"F Y" as all_scores_by_date_grouped %}
+<table class="score_snippet">
+{% for month in all_scores_by_date_grouped %}
+<tr class="heading"><td colspan="4">{{ month.grouper }}</td></tr>
+    {% for score in month.list %}
+    {% include "score_snippet.html" with score=score %}
+    {% endfor %}
+{% endfor %}
+</table>
+{% endblock %}
+{% block style %}
+tr.heading td {
+    font-weight: bold; 
+    border: 3px solid #ccc; 
+    border-width: 3px 0; 
+    background: white;
+}
+{% endblock %}

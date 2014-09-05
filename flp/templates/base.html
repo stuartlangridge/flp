@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf8">
+<meta name="viewport" content="width=device-width, user-scalable=no">
+<title>{% block title %}{% endblock %}</title>
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+}
+body {
+    background: #f7f6f5;
+    font-family: sans-serif;
+}
+footer {
+    margin: 1em 0 0 0;
+}
+footer p {
+    text-align: right;
+    color: #999;
+}
+footer p a {
+    color: #666;
+}
+
+header h1 {
+    background: #ccc;
+}
+header p, header h1, #main {
+    padding: 10px 20px;
+    margin: 0;
+    font-weight: 100;
+}
+header h1 a {
+    text-decoration: none;
+    color: #333;
+}
+
+table.score_snippet td {
+    height: 30px;
+    line-height: 30px;
+    padding: 5px 10px;
+    background: white;
+}
+table.score_snippet td:nth-child(2) {
+    font-size: 2em;
+}
+p.banner {
+    font-size: 2em;
+    text-align: center;
+}
+{% block style %}{% endblock %}
+</style>
+</head>
+<body>
+    <header>
+        <h1><a href="{% url 'index' %}">Fantasy League Planet Birmingham</a></h1>
+
+        <p>
+        {% if user and not user.is_anonymous %}
+            You are <a href="{% url 'user' user.username %}">{{ user.get_full_name|default:user.username }}</a>, and this month so far you've scored {{ my_score_this_month }} <a href="{% url 'my-blogs' %}">{% ifequal my_blogs|length 5 %}from your 5 chosen blogs{% else %}because you haven't chosen any blogs yet{% endifequal %}</a>.
+            <a href="{% url 'twitter_logout' %}">Sign out</a>.
+        {% else %}
+            <a href="{% url 'twitter_login' %}">Sign in with Twitter</a>.
+       {% endif %}
+       </p>
+    </header>
+
+    <div id="main">
+    {% block content %}{% endblock %}
+    </div>
+
+    <footer>
+    {% block footer %}
+    <p>This is an <a href="http://twitter.com/sil">@sil</a> thing.</p>
+    {% endblock %}
+    </footer>
+<script>
+{% block script %}{% endblock %}
+</script>
+</body>
+</html>

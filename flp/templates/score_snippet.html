@@ -1,0 +1,6 @@
+    <tr>
+        <td>{% if score.attached_url %}<a href="{{ score.attached_url }}">{% endif %}{{ score.reason }}{% if score.attached_url %}</a>{% endif %}</td>
+        <td>{{ score.value }}</td>
+        <td><a href="{% url 'blog' score.post.blog.id %}">{{ score.post.blog.name }}</a></td>
+        <td>{{ score.post.date }}</td>
+    </tr>
