@@ -40,9 +40,9 @@ function updateTotals() {
         var nprice;
         var boughtfor = p.parentNode.querySelector("em em");
         if (boughtfor) {
-            nprice = parseInt(boughtfor.firstChild.nodeValue, 10);
+            nprice = parseInt(boughtfor.firstChild.nodeValue.slice(1), 10);
         } else {
-            nprice = parseInt(p.firstChild.nodeValue, 10);
+            nprice = parseInt(p.firstChild.nodeValue.slice(1), 10);
         }
         if (isNaN(nprice)) nprice = 100000;
         price += nprice;
