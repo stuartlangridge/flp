@@ -50,6 +50,14 @@ p.banner {
     font-size: 2em;
     text-align: center;
 }
+@media only screen and (max-width: 420px) {
+
+    /* Force table to not be like tables anymore */
+    table, thead, tbody, th, td, tr { 
+        display: block; 
+    }
+}
+
 {% block style %}{% endblock %}
 </style>
 </head>

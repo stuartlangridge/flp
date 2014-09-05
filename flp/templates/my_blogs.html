@@ -18,10 +18,10 @@
     <input type="checkbox" name="chosen_{{blog.id}}" id="chosen_{{blog.id}}"
     {% if blog.my_price %}checked{% endif %}>
     <label for="chosen_{{blog.id}}"><strong>{{blog.name}}</strong>
-        <span>{{blog.price}}</span>
+        <span>&pound;{{blog.price}}</span>
         {% if blog.my_price %}
         {% if blog.my_price != blog.price %}
-        <em>(bought for <em>{{blog.my_price}}</em>)</em>
+        <em>(bought for <em>&pound;{{blog.my_price}}</em>)</em>
         {% endif %}
         {% endif %}
     </label>
