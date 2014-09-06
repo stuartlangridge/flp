@@ -20,7 +20,7 @@
     {% if blog.my_price %}checked{% endif %}>
     <label for="chosen_{{blog.id}}"><strong>{{blog.name}}</strong>
         <span class="price">&pound;{{blog.price}}</span>
-        <span class="avg">Average monthly score: {{ blog.average_month_score }}</span>
+        <span class="avg">Average monthly score: {{ blog.average_month_score|floatformat }}</span>
         {% if blog.my_price %}
         {% if blog.my_price != blog.price %}
         <em>(bought for <em>&pound;{{blog.my_price}}</em>)</em>
