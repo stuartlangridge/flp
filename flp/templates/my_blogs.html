@@ -9,8 +9,9 @@
 <form method="POST">
 {% csrf_token %}
 <p id="spent">Total spent: &pound;<span id="totalmoney">0</span> on <span id="totalblogs">0</span> blogs</p>
-<input type="submit" value="Choose these blogs" disabled data-title="You must choose five blogs"
-    title="You must choose five blogs">
+<p class="submit"><input type="submit" value="Choose these blogs" disabled 
+    data-title="You must choose five blogs"
+    title="You must choose five blogs"></p>
 
 <ul id="choose">
     {% for blog in bloglist|dictsortreversed:"price" %}
@@ -18,7 +19,8 @@
     <input type="checkbox" name="chosen_{{blog.id}}" id="chosen_{{blog.id}}"
     {% if blog.my_price %}checked{% endif %}>
     <label for="chosen_{{blog.id}}"><strong>{{blog.name}}</strong>
-        <span>&pound;{{blog.price}}</span>
+        <span class="price">&pound;{{blog.price}}</span>
+        <span class="avg">Average monthly score: {{ blog.average_month_score }}</span>
         {% if blog.my_price %}
         {% if blog.my_price != blog.price %}
         <em>(bought for <em>&pound;{{blog.my_price}}</em>)</em>
@@ -34,7 +36,7 @@
 {% block script %}
 function updateTotals() {
     var chosen = document.querySelectorAll("input:checked");
-    var prices = document.querySelectorAll("input:checked + label span");
+    var prices = document.querySelectorAll("input:checked + label span.price");
     var price = 0;
     Array.prototype.slice.call(prices).forEach(function(p) {
         var nprice;
@@ -54,7 +56,7 @@ function updateTotals() {
     document.querySelector("#totalblogs").innerHTML = chosen.length;
     var remaining_price = MAX_PRICE - price;
     cbs.forEach(function(cb) {
-        var nprice = parseInt(cb.parentNode.getElementsByTagName("span")[0].firstChild.nodeValue.slice(1), 10);
+        var nprice = parseInt(cb.parentNode.querySelector("span.price").firstChild.nodeValue.slice(1), 10);
         if (isNaN(nprice)) nprice = 100000;
         if (cb.checked) {
             cb.disabled = false;
@@ -143,7 +145,7 @@ ul#choose {
     font-weight: 100;
     padding-left: 5px;
 }
-#choose label span {
+#choose label span.price {
     width: 40%;
     max-width: 100px;
     float: right;
@@ -154,6 +156,12 @@ ul#choose {
     position: absolute;
     bottom: 3px;
     right: 10px;
+    font-size: 8px;
+}
+#choose label span.avg {
+    position: absolute;
+    bottom: 3px;
+    left: 10%;
     font-size: 8px;
 }
 #choose input[type=checkbox] {
@@ -182,5 +190,19 @@ p.error {
     border: 3px solid red;
     padding: 8px;
     background: #fee;
+}
+p.submit, p#spent {
+    text-align: center;
+}
+input[type=submit] {
+    font-size: 2em;
+}
+input[type=submit] {
+    background-color: #4c4;
+    color: white;
+}
+input[type=submit]:disabled {
+    background-color: #c44;
+    color: #500;
 }
 {% endblock %}

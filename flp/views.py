@@ -9,6 +9,7 @@ from django.db.models import Q, Max, Sum
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 import flp.common
+from django.core.urlresolvers import reverse
 
 def fetchfeeds(request):
     secret = request.GET.get("secret")
@@ -107,10 +108,26 @@ def user(request, username):
         "individual_scores": Score.objects.filter(user2score__user=thisuser,
             month=now.month, year=now.year)})
 
+def signed_in(request):
+    myblogs = User2Blog.objects.filter(user=request.user)
+    if myblogs.count() == 0:
+        return redirect("my-blogs")
+    return redirect("index")
+
 @login_required
 def my_blogs(request):
     budget = settings.BUDGET
     errors = []
+
+    # Calculate top blogs ever
+    cursor = connection.cursor()
+    cursor.execute("""select avg(sq.total),sq.blog_id,sq.name from (
+        select p.blog_id,b.name,s.month,s.year,sum(value) as total 
+        from flp_score s inner join flp_post p on s.post_id=p.id 
+        inner join flp_blog b on p.blog_id=b.id group by p.blog_id, 
+        b.name, s.month, s.year
+        ) sq group by sq.blog_id, sq.name order by avg(sq.total) desc;""")
+    average_month_scores_by_blog = dict([(x[1], x[0]) for x in cursor.fetchall()])
 
     mybloglist = Blog.objects.filter(user2blog__user=request.user).values(
         "id", "user2blog__price")
@@ -122,6 +139,7 @@ def my_blogs(request):
             blog["my_price"] = mybloglist[blog["id"]]["user2blog__price"]
         else:
             blog["my_price"] = None
+        blog["average_month_score"] = average_month_scores_by_blog.get(blog["id"], 0)
         bloglist.append(blog)
     blogdict = dict([(x["id"],x) for x in bloglist])
 

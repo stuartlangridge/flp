@@ -120,6 +120,6 @@ TWITTER_SECRET = os.environ.get("SOCIAL_AUTH_TWITTER_SECRET", "")
 
 LOGIN_URL='/twitterauth/login'
 LOGOUT_URL='/twitterauth/logout'
-LOGIN_REDIRECT_URL='/'
+LOGIN_REDIRECT_URL='/signed-in'
 LOGOUT_REDIRECT_URL='/'
 
