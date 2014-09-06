@@ -55,7 +55,8 @@ def index(request):
         "top_blogs_ever": top_blogs_ever,
         "highest_scorers_this_month": highest_scorers_this_month,
         "budget": settings.BUDGET,
-        "authors": authors
+        "authors": authors,
+        "recent_scores": Score.objects.all().order_by("-created_date")[:5]
     })
 
 def blog(request, blogdbid):

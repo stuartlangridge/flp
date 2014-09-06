@@ -1,8 +1,18 @@
 {% extends "base.html" %}
 {% load humanize %}
+{% load months %}
 {% block content %}
 <p>This is <strong>Fantasy League Planet Birmingham</strong>! Basically, you get {{ budget|intcomma }} virtual pounds to buy a selection of five blogs from <a href="http://planet.birmingham.io/">Planet Birmingham</a>, and then whenever your blogs post or get linked to you get points. Encourage your friends to sign up and then mock them when you score more than they do!</p>
 <p>{% if user and not user.is_anonymous %}You can <a href="{% url 'my-blogs' %}">{% ifequal my_blogs|length 5 %}edit your chosen blogs now{% else %}choose your five blogs now{% endifequal %}</a>{% else %}Simply <a href="{% url 'twitter_login' %}">sign in with Twitter to get started</a>{% endif %}.
+
+<div class="box">
+<h2>Recent events</h2>
+<ul>
+    {% for score in recent_scores %}
+    <li><a href="{% url 'blog' score.post.blog.id %}">{{ score.reason }}, {{ score.post.blog.name }}</a> <span><date datetime="{{ score.created_date|date:"c" }}">{{ score.created_date|age }}</span></li>
+    {% endfor %}
+</ul>
+</div>
 
 <div class="box">
 <h2>Top blogs this month so far</h2>
