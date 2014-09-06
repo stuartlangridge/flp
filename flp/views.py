@@ -32,6 +32,14 @@ def index(request):
         ) sq group by sq.blog_id, sq.name order by avg(sq.total) desc;""")
     top_blogs_ever = cursor.fetchall()[:5]
 
+    cursor.execute("""select u.id, u.username, s.month, sum(s.value) as total
+        from auth_user u 
+        left outer join flp_user2score us on u.id=us.user_id 
+        left outer join flp_score s on us.score_id=s.id
+        where s.month = %s or s.month is null
+        group by u.id, u.username, s.month order by total desc""", [now.month])
+    highest_scorers_this_month = cursor.fetchall()[:5]
+
     authors = dict([
         (
             (p.author,p.blog.id), 
@@ -44,9 +52,7 @@ def index(request):
             ).values("post__blog__name", "post__blog__id").annotate(
             total=Sum("value")).order_by("-total")[:5],
         "top_blogs_ever": top_blogs_ever,
-        "highest_scorers_this_month": User2Score.objects.filter(score__month=now.month,
-            score__year=now.year).values("user__id", "user__username").annotate(
-            total=Sum("score__value")).order_by("-total"),
+        "highest_scorers_this_month": highest_scorers_this_month,
         "budget": settings.BUDGET,
         "authors": authors
     })
