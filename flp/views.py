@@ -113,7 +113,8 @@ def user(request, username):
     return render(request, "user.html", {"thisuser": thisuser, 
         "thismonthscore": thismonthscore, "monthscores": monthscores,
         "individual_scores": Score.objects.filter(user2score__user=thisuser,
-            month=now.month, year=now.year)})
+            month=now.month, year=now.year),
+        "userblogs": Blog.objects.filter(user2blog__user=thisuser)})
 
 def signed_in(request):
     myblogs = User2Blog.objects.filter(user=request.user)

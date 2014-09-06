@@ -10,6 +10,8 @@
 {% if thismonthscore.position == 1 %}in the lead!{% elif thismonthscore.position == 0 %}in last place :-({% else %}in 
 {{ thismonthscore.position|ordinal }} place!{% endif %}</p>
 
+<p>On {{ thisuser.username }}'s team: {% for blog in userblogs %}{% if forloop.last %} and {% endif %}<a href="{% url 'blog' blog.id %}">{{ blog.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}.
+
 <h3>Scores for 
 {% ifequal thisuser.username user.username %}you{%else%}{{ thisuser.username }}{% endifequal %}
  this month so far</h3>
