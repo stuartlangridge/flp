@@ -54,7 +54,7 @@ function updateTotals() {
     document.querySelector("#totalblogs").innerHTML = chosen.length;
     var remaining_price = MAX_PRICE - price;
     cbs.forEach(function(cb) {
-        var nprice = parseInt(cb.parentNode.getElementsByTagName("span")[0].firstChild.nodeValue, 10);
+        var nprice = parseInt(cb.parentNode.getElementsByTagName("span")[0].firstChild.nodeValue.slice(1), 10);
         if (isNaN(nprice)) nprice = 100000;
         if (cb.checked) {
             cb.disabled = false;
