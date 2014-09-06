@@ -17,7 +17,7 @@
 <h2>Leading users this month so far</h2>
 <ul>
     {% for umc in highest_scorers_this_month %}
-    <li><a href="{% url 'user' umc.1 %}"><img src="http://twitter.com/api/users/profile_image/{{ umc.1 }}"> {{ umc.1 }}</a> <span>{{ umc.2|default_if_none:"0" }}</span></li>
+    <li><a href="{% url 'user' umc.1 %}"><img src="http://twitter.com/api/users/profile_image/{{ umc.1 }}"> {{ umc.1 }}</a> <span>{{ umc.3|default_if_none:"0" }}</span></li>
     {% endfor %}
 </ul>
 </div>
