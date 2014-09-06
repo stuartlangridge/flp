@@ -38,7 +38,8 @@ def index(request):
         left outer join flp_score s on us.score_id=s.id
         where s.month = %s or s.month is null
         group by u.id, u.username, s.month order by total desc""", [now.month])
-    highest_scorers_this_month = cursor.fetchall()[:5]
+    highest_scorers_this_month = sorted(cursor.fetchall(), 
+        cmp=lambda b,a:cmp(a[3],b[3]))[:5]
 
     authors = dict([
         (
