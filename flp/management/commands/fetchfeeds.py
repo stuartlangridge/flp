@@ -90,7 +90,7 @@ class Command(BaseCommand):
         # first, get a list of all post links. This is all the ones in the DB, plus all the new ones
         post_links = dict([(p["link"], p["blog_id"]) for p in posts])
         for dbpost in Post.objects.all():
-            post_links[dbpost.link] = dbpost.blog.id
+            post_links[dbpost.link] = dbpost.blog.url
         # next, get all URLs in all new post content, and update the links count for any which match
         GRUBER_URLINTEXT_PAT = re.compile(ur'(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?\xab\xbb\u201c\u201d\u2018\u2019]))')
         for post in posts:
@@ -111,7 +111,7 @@ class Command(BaseCommand):
         # Finished with post content, so remove it
         for post in posts:
             del(post["content"])
-
+        return
         blogs_with_updates = {}
 
         # First, add any new blogs
