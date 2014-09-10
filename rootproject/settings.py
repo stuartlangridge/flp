@@ -123,3 +123,10 @@ LOGOUT_URL='/twitterauth/logout'
 LOGIN_REDIRECT_URL='/signed-in'
 LOGOUT_REDIRECT_URL='/'
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'cachedata',
+    }
+}
+

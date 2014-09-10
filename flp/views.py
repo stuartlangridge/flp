@@ -10,6 +10,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 import flp.common
 from django.core.urlresolvers import reverse
+from django.core.cache import cache
+from twython import Twython
 
 def fetchfeeds(request):
     secret = request.GET.get("secret")
@@ -18,6 +20,17 @@ def fetchfeeds(request):
         call_command('fetchfeeds')
         return HttpResponse("done.")
     return HttpResponse("you fail.")
+
+def twitter_image(request, username):
+    cachekey = "twitter-image-url:%s" % (username,)
+    image_url = cache.get(cachekey)
+    if image_url is None:
+        print "fetch from twitter"
+        twitter = Twython(os.environ.get("SOCIAL_AUTH_TWITTER_KEY"), 
+            access_token=os.environ.get("TWITTER_OAUTH2_ACCESS_TOKEN"))
+        image_url = twitter.show_user(screen_name=username).get("profile_image_url")
+        cache.set(cachekey, image_url)
+    return redirect(image_url)
 
 def index(request):
     now = datetime.datetime.now()
@@ -37,7 +50,8 @@ def index(request):
         left outer join flp_user2score us on u.id=us.user_id 
         left outer join flp_score s on us.score_id=s.id
         where s.month = %s or s.month is null
-        group by u.id, u.username, s.month order by total desc""", [now.month])
+        and s.year = %s
+        group by u.id, u.username, s.month order by total desc""", [now.month, now.year])
     highest_scorers_this_month = sorted(cursor.fetchall(), 
         cmp=lambda b,a:cmp(a[3],b[3]))[:5]
 

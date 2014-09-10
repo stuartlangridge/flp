@@ -3,7 +3,7 @@
 {% load humanize %}
 {% block title %}{{ thisuser.username }}{% endblock %}
 {% block content %}
-<h2><img src="http://twitter.com/api/users/profile_image/{{ thisuser.username }}"> {{ thisuser.username }}</h2>
+<h2><img src="{% url 'twitter-image' thisuser.username %}"> {{ thisuser.username }}</h2>
 <p class="banner">Current score for {{ thismonthscore.month|month_name }} {{ thismonthscore.year }}: {{ thismonthscore.total }}</p>
 <p class="banner">That puts 
 {% ifequal thisuser.username user.username %}you{%else%}{{ thisuser.username }}{% endifequal %}
