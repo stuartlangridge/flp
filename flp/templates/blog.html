@@ -4,7 +4,7 @@
 <h2>{{ blog.name }} (<a href="{{blog.url}}">visit site</a>)</h2>
 <p class="banner">Total score this month: {{ total_score_this_month }}</p>
 <p>Currently {{ blog.name }} is in
-    {% ifequal subscribers|length 0 %}nobody's team{% else %}{% for u in subscribers %}{% if forloop.last %} and {% endif %}<a href="{% url 'user' u.user.username %}">{{ u.user.username }}</a>'s{% if not forloop.last and subscribers|length > 2 %}, {% endif %}{% endfor %} team{{ subscribers|length|pluralize}}{% endifequal %}.
+    {% ifequal subscribers|length 0 %}nobody's team{% else %}{% for u in subscribers %}{% if forloop.last and subscribers|length > 1 %} and {% endif %}<a href="{% url 'user' u.user.username %}">{{ u.user.username }}</a>'s{% if not forloop.last and subscribers|length > 2 %}, {% endif %}{% endfor %} team{{ subscribers|length|pluralize}}{% endifequal %}.
 </p>
 <h2>Score history</h2>
 
