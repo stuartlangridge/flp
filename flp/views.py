@@ -17,8 +17,13 @@ def fetchfeeds(request):
     secret = request.GET.get("secret")
     if secret and secret == os.environ.get("FETCHFEEDS_SECRET"):
         from django.core.management import call_command
-        call_command('fetchfeeds')
-        return HttpResponse("done.")
+        from StringIO import StringIO
+        content = StringIO()
+        call_command('fetchfeeds', stdout=content)
+        content.seek(0)
+        out = content.read()
+        print out
+        return HttpResponse("output: %s" % out)
     return HttpResponse("you fail.")
 
 def twitter_image(request, username):

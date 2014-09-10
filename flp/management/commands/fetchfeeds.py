@@ -111,7 +111,6 @@ class Command(BaseCommand):
         # Finished with post content, so remove it
         for post in posts:
             del(post["content"])
-        return
         blogs_with_updates = {}
 
         # First, add any new blogs
@@ -123,7 +122,7 @@ class Command(BaseCommand):
             except Blog.DoesNotExist:
                 blog = Blog(url=blog_id, name=blog_name, price=0)
                 blog.save()
-                print "Added new blog '%s' (%s)" % (blog_name, blog_id)
+                self.stdout.write("Added new blog '%s' (%s)" % (blog_name, blog_id))
                 blogs_with_updates[blog.id] = blog
 
         # Now, add new posts
@@ -138,7 +137,7 @@ class Command(BaseCommand):
                     length=post["length"], date=post["date"], 
                     link=post["link"], author=post["author"])
                 newpost.save()
-                print "Added new post '%s'" % (post["id"],)
+                self.stdout.write("Added new post '%s'" % (post["id"],))
                 blogs_with_updates[existing_blog.id] = existing_blog
 
                 # Now calculate any scores for that post and insert them too
@@ -162,7 +161,7 @@ class Command(BaseCommand):
                         created_date=post["date"], attached_url=post["link"],
                         month=post["date"].month, year=post["date"].year)
                     s.save()
-                    print "Added score", s
+                    self.stdout.write("Added score: %s" % s)
 
                     # and credit all users who own this blog with that score
                     for ub in User2Blog.objects.filter(blog=existing_blog):
@@ -210,10 +209,10 @@ class Command(BaseCommand):
         #print "An ideal blog is worth", ideal_blog_factor * money
 
         # Update scores for each blog
-        print "Updating scores for %s updated blogs" % len(blogs_with_updates.values())
+        self.stdout.write("Updating scores for %s updated blogs" % len(blogs_with_updates.values()))
         now = datetime.datetime.now()
         for blog in blogs_with_updates.values():
-            print "updating price for blog", blog
+            self.stdout.write("updating price for blog %s" % blog)
 
             average_per_month_scores = Score.objects.filter(post__blog=blog).values(
                 "month", "year").annotate(total=Sum("value"))
