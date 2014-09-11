@@ -7,6 +7,18 @@ import requests, feedparser
 from django.db.models import Sum
 from django.contrib.auth.models import User
 
+def andlist(items):
+    if len(items) == 0:
+        return ""
+    elif len(items) == 1:
+        return items[0]
+    elif len(items) == 2:
+        return "%s and %s" % (items[0], items[1])
+    else:
+        lst = sorted(items)
+        lst[-1] = "and %s" % lst[-1]
+        return ", ".join(lst)
+
 _slugify_strip_re = re.compile(r'[^\w\s-]')
 _slugify_hyphenate_re = re.compile(r'[-\s]+')
 def _slugify(value):
@@ -31,7 +43,10 @@ class Command(BaseCommand):
         if len(args) > 0:
             url = args[0]
             try: # explicitly specified thing to fetch
-                if args[0].startswith("http://") or args[0].startswith("https://"):
+                if getattr(url, "read", None):
+                    # thing specified is a file-like object. The test suite does this
+                    atom = url.read()
+                elif args[0].startswith("http://") or args[0].startswith("https://"):
                     atom = requests.get(url).content
                 else:
                     fp = codecs.open(url)
@@ -115,6 +130,7 @@ class Command(BaseCommand):
 
         # First, add any new blogs
         blogs = dict([(x["blog_id"], x["blog_name"]) for x in posts])
+        twitter = {}
 
         for blog_id, blog_name in blogs.items():
             try:
@@ -122,8 +138,9 @@ class Command(BaseCommand):
             except Blog.DoesNotExist:
                 blog = Blog(url=blog_id, name=blog_name, price=0)
                 blog.save()
-                self.stdout.write("Added new blog '%s' (%s)" % (blog_name, blog_id))
+                self.stdout.write(u"Added new blog '%s' (%s)" % (blog_name, blog_id))
                 blogs_with_updates[blog.id] = blog
+
 
         # Now, add new posts
         posts_in_db = []
@@ -137,8 +154,10 @@ class Command(BaseCommand):
                     length=post["length"], date=post["date"], 
                     link=post["link"], author=post["author"])
                 newpost.save()
-                self.stdout.write("Added new post '%s'" % (post["id"],))
+                self.stdout.write(u"Added new post '%s'" % (post["id"],))
                 blogs_with_updates[existing_blog.id] = existing_blog
+                twitter[post["blog_id"]] = {"blog_name": existing_blog.name, "users": {}}
+
 
                 # Now calculate any scores for that post and insert them too
                 new_post_score = 6
@@ -161,11 +180,14 @@ class Command(BaseCommand):
                         created_date=post["date"], attached_url=post["link"],
                         month=post["date"].month, year=post["date"].year)
                     s.save()
-                    self.stdout.write("Added score: %s" % s)
+                    self.stdout.write(u"Added score: %s" % s)
 
                     # and credit all users who own this blog with that score
                     for ub in User2Blog.objects.filter(blog=existing_blog):
                         User2Score(user=ub.user, score=s).save()
+                        if ub.user.username not in twitter[post["blog_id"]]["users"]:
+                            twitter[post["blog_id"]]["users"][ub.user.username] = 0
+                        twitter[post["blog_id"]]["users"][ub.user.username] += new_post_score
 
         # Credit scores for links between posts
         for postlink, scoreitems in posts_linking_to_one_another.items():
@@ -183,6 +205,9 @@ class Command(BaseCommand):
                     # and credit all users who own this blog with that score
                     for user in User2Blog.objects.filter(blog=post.blog):
                         User2Score(user=user, score=s).save()
+                        if user.username not in twitter[post["blog_id"]]["users"]:
+                            twitter[post["blog_id"]]["users"][user.username] = 0
+                        twitter[post["blog_id"]]["users"][user.username] += 1
 
                 elif "linked_from" in scoreitem:
                     if scoreitem["linked_from"] in posts_in_db:
@@ -196,6 +221,9 @@ class Command(BaseCommand):
                     # and credit all users who own this blog with that score
                     for user in User2Blog.objects.filter(blog=post.blog):
                         User2Score(user=user, score=s).save()
+                        if user.username not in twitter[post["blog_id"]]["users"]:
+                            twitter[post["blog_id"]]["users"][user.username] = 0
+                        twitter[post["blog_id"]]["users"][user.username] += 1
 
         # Calculate the price of an ideal blog, to use when calculating blog prices below
         ideal = (30 / 2) * (6 + 2)
@@ -209,10 +237,10 @@ class Command(BaseCommand):
         #print "An ideal blog is worth", ideal_blog_factor * money
 
         # Update scores for each blog
-        self.stdout.write("Updating scores for %s updated blogs" % len(blogs_with_updates.values()))
+        self.stdout.write(u"Updating scores for %s updated blogs" % len(blogs_with_updates.values()))
         now = datetime.datetime.now()
         for blog in blogs_with_updates.values():
-            self.stdout.write("updating price for blog %s" % blog)
+            self.stdout.write(u"updating price for blog %s" % blog)
 
             average_per_month_scores = Score.objects.filter(post__blog=blog).values(
                 "month", "year").annotate(total=Sum("value"))
@@ -250,5 +278,85 @@ class Command(BaseCommand):
             blog.price = blog_cost
             blog.save()
 
+        # Create twitter output
+        self.stdout.write("\n\n====== BEGIN TWITTER ======\n")
+        twitter_output = []
+        scoring_users = []
+        if len(twitter) == 0:
+            # no new things, so no tweet
+            twitter_output = []
+        elif len(twitter) == 1:
+            # one blog updated
+            updated_blog = twitter.values()[0]
+            if len(updated_blog["users"]) == 0:
+                twitter_output = [
+                    u"And %s adds a post!" % (updated_blog["blog_name"],),
+                    u"Wish someone had it in their team."
+                ]
+            else:
+                scoring_users += updated_blog["users"]
+                score = "score"
+                if len(scoring_users) == 1: score = "scores"
+                twitter_output = [
+                    u"%s adds a post!" % (updated_blog["blog_name"],),
+                    sorted(["@%s" % x for x in scoring_users]),
+                    score + u" some points!"
+                ]
+        else:
+            # more than one blog updated
+            for updated_blog in twitter.values():
+                scoring_users += updated_blog["users"]
+            if len(scoring_users) == 0:
+                twitter_output = [
+                    sorted([x["blog_name"] for x in twitter.values()]),
+                    u"addSSS a post!",
+                    u"If only someone had them in their team."
+                ]
+            else:
+                twitter_output = [
+                    sorted([x["blog_name"] for x in twitter.values()]),
+                    u"addSSS a post!",
+                    sorted(["@%s" % x for x in scoring_users]),
+                    u"scoreSSS some points!"
+                ]
+        final_output = " " * 141
+        attempts = 0
+        list_decrements = {}
+        while len(final_output) > 120 and attempts < 10: # 120, leave space for url
+            attempts += 1
+            #print "Too long, attempt", attempts
+            fo = []
+            last_list_count = 1
+            for i in range(len(twitter_output)):
+                item = twitter_output[i]
+                #print "got item, %r" % (item,)
+                if type(item) == type([]):
+                    #print "and it is a list"
+                    dec_amt = list_decrements.get(i)
+                    if dec_amt is None:
+                        # first time through the loop
+                        list_decrements[i] = len(item)
+                        fo.append(andlist(item))
+                        last_list_count = len(item)
+                        #print "first time, appending", andlist(item)
+                    elif dec_amt == 0:
+                        # decreased all the way to zero, so just the first
+                        fo.append(andlist([item[0]]))
+                        last_list_count = 1
+                        #print "deced to zero, appending", fo[-1]
+                    else:
+                        list_decrements[i] = list_decrements[i] - 1
+                        fo.append(andlist(item[:list_decrements[i]]))
+                        last_list_count = list_decrements[i]
+                        #print "deced to", list_decrements[i], "appending", fo[-1]
+                else:
+                    if last_list_count == 1:
+                        SSS = "s"
+                    else:
+                        SSS = ""
+                    fo.append(item.replace("SSS", SSS))
+            final_output = " ".join(fo)
+        if final_output: final_output +=  " http://flpb.herokuapp.com"
+        self.stdout.write(final_output)
 
 
