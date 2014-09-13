@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
-from .models import Blog, Score, Post, User2Score, User2Blog
+from .models import Blog, Score, Post, User2Score, User2Blog, Log
 from django.conf import settings
 import datetime, re, os
 from django.db import connection
@@ -11,6 +11,7 @@ from django.contrib.auth.decorators import login_required
 import flp.common
 from django.core.urlresolvers import reverse
 from django.core.cache import cache
+from django.contrib.syndication.views import Feed
 from twython import Twython
 
 def fetchfeeds(request):
@@ -22,7 +23,6 @@ def fetchfeeds(request):
         call_command('fetchfeeds', stdout=content)
         content.seek(0)
         out = content.read()
-        print out
         return HttpResponse("output: %s" % out)
     return HttpResponse("you fail.")
 
@@ -255,3 +255,13 @@ def my_blogs(request):
 
     return render(request, "my_blogs.html", {"bloglist": bloglist,
         "budget": budget, "errors": errors})
+
+class PublicLogFeed(Feed):
+    title = "Fantasy League Planet Birmingham"
+    link = "/"
+    description = "Activity on Fantasy League Planet Birmingham"
+
+    def items(self): return Log.objects.order_by("-created_at")[:10]
+    def item_title(self, item): return item.message
+    def item_description(self, item): return item.message
+    def item_link(self, item): return reverse("index")

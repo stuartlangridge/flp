@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 class Blog(models.Model):
     url = models.URLField()
@@ -38,3 +40,15 @@ class User2Blog(models.Model):
     created_at = models.DateTimeField()
     def __unicode__(self): return u'User %s owning %s' % (self.user, self.blog)
 
+class Log(models.Model):
+    message = models.CharField(max_length=140)
+    created_at = models.DateTimeField(auto_now_add=True)
+    def __unicode__(self): return u'Log message "%s"' % (self.message)
+
+@receiver(post_save, sender=User, dispatch_uid="log new user creation")
+def user_saved(sender, **kwargs):
+    created = kwargs.get("created")
+    instance = kwargs.get("instance")
+    if created and instance:
+        from flp.common import publicLog
+        publicLog("New shooter! New shooter @%s! Does our new shooter feel lucky?" % instance.username)

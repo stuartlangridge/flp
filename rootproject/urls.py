@@ -15,6 +15,7 @@ urlpatterns = patterns('',
         flp.views.twitter_image, name='twitter-image'),
     url(r'^fetchfeeds$', flp.views.fetchfeeds),
     (r'^twitterauth/', include('twython_django_oauth.urls')),
+    url(r'^feed$', flp.views.PublicLogFeed()),
     url(r'^admin/', include(admin.site.urls)),
 
 )

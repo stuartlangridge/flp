@@ -6,6 +6,8 @@ import os, codecs, html5lib, re, sys, datetime, time, urlparse
 import requests, feedparser
 from django.db.models import Sum
 from django.contrib.auth.models import User
+from twython import Twython
+from flp.common import publicLog
 
 def andlist(items):
     if len(items) == 0:
@@ -278,6 +280,9 @@ class Command(BaseCommand):
             blog.price = blog_cost
             blog.save()
 
+        for b in blogs_with_updates.values():
+            publicLog("A new blog arrives! You may now purchase %s" % (b.name,))
+
         # Create twitter output
         self.stdout.write("\n\n====== BEGIN TWITTER ======\n")
         twitter_output = []
@@ -322,7 +327,7 @@ class Command(BaseCommand):
         final_output = " " * 141
         attempts = 0
         list_decrements = {}
-        while len(final_output) > 120 and attempts < 10: # 120, leave space for url
+        while len(final_output) > 140 and attempts < 10:
             attempts += 1
             #print "Too long, attempt", attempts
             fo = []
@@ -356,7 +361,8 @@ class Command(BaseCommand):
                         SSS = ""
                     fo.append(item.replace("SSS", SSS))
             final_output = " ".join(fo)
-        if final_output: final_output +=  " http://flpb.herokuapp.com"
+        if final_output:
+            publicLog(final_output)
         self.stdout.write(final_output)
 
 

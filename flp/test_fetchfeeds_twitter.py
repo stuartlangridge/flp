@@ -224,7 +224,8 @@ class TwitterTestCase(TestCase):
             "updated": "2014-09-02T18:45:59Z"
         }])
         self.assertEqual(twitter, 
-            "Blog 1 adds a post! @user_name_long_is_1, @user_name_long_is_2, and @user_name_long_is_3 score some points!")
+            ("Blog 1 adds a post! @user_name_long_is_1, @user_name_long_is_2, @user_name_long_is_3, "
+                "and @user_name_long_is_4 score some points!"))
 
     def test_many_new_posts_many_subscribers(self):
         """Many new posts for many people"""
@@ -250,7 +251,8 @@ class TwitterTestCase(TestCase):
 
         twitter = self.get_twitter_from_new_entries(entries)
         self.assertEqual(twitter, 
-            "Blog 1, Blog 2, Blog 3, Blog 4, Blog 5, and Blog 6 add a post! @u1, @u2, @u3, @u4, @u5, and @u6 score some points!")
+            ("Blog 1, Blog 2, Blog 3, Blog 4, Blog 5, Blog 6, Blog 7, and Blog 8 add a post! "
+                "@u1, @u2, @u3, @u4, @u5, @u6, @u7, and @u8 score some points!"))
 
     def test_many_new_posts_many_long_subscribers(self):
         """Many new posts for many people"""
@@ -276,7 +278,9 @@ class TwitterTestCase(TestCase):
 
         twitter = self.get_twitter_from_new_entries(entries)
         self.assertEqual(twitter, 
-            "Blog 1 and Blog 2 add a post! @username_is_long_1 and @username_is_long_2 score some points!")
+            ("Blog 1, Blog 2, and Blog 3 add a post! "
+                "@username_is_long_1, @username_is_long_2, and "
+                "@username_is_long_3 score some points!"))
 
     def test_many_new_long_posts_many_long_subscribers(self):
         """Many new posts for many people"""
