@@ -129,6 +129,7 @@ class Command(BaseCommand):
         for post in posts:
             del(post["content"])
         blogs_with_updates = {}
+        newly_created_blog_names = []
 
         # First, add any new blogs
         blogs = dict([(x["blog_id"], x["blog_name"]) for x in posts])
@@ -142,7 +143,7 @@ class Command(BaseCommand):
                 blog.save()
                 self.stdout.write(u"Added new blog '%s' (%s)" % (blog_name, blog_id))
                 blogs_with_updates[blog.id] = blog
-
+                newly_created_blog_names.append(blog_name)
 
         # Now, add new posts
         posts_in_db = []
@@ -280,8 +281,8 @@ class Command(BaseCommand):
             blog.price = blog_cost
             blog.save()
 
-        for b in blogs_with_updates.values():
-            publicLog("A new blog arrives! You may now purchase %s" % (b.name,))
+        for name in newly_created_blog_names:
+            publicLog("A new blog arrives! You may now purchase %s" % (name,))
 
         # Create twitter output
         self.stdout.write("\n\n====== BEGIN TWITTER ======\n")
