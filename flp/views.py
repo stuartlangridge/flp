@@ -14,6 +14,18 @@ from django.core.cache import cache
 from django.contrib.syndication.views import Feed
 from twython import Twython
 
+def tweetcount(request):
+    secret = request.GET.get("secret")
+    if secret and secret == os.environ.get("FETCHFEEDS_SECRET"):
+        from django.core.management import call_command
+        from StringIO import StringIO
+        content = StringIO()
+        call_command('update_twitter', stdout=content)
+        content.seek(0)
+        out = content.read()
+        return HttpResponse("output: %s" % out)
+    return HttpResponse("you fail.")
+
 def fetchfeeds(request):
     secret = request.GET.get("secret")
     if secret and secret == os.environ.get("FETCHFEEDS_SECRET"):

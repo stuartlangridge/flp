@@ -7,19 +7,7 @@ import requests, feedparser
 from django.db.models import Sum
 from django.contrib.auth.models import User
 from twython import Twython
-from flp.common import publicLog
-
-def andlist(items):
-    if len(items) == 0:
-        return ""
-    elif len(items) == 1:
-        return items[0]
-    elif len(items) == 2:
-        return "%s and %s" % (items[0], items[1])
-    else:
-        lst = sorted(items)
-        lst[-1] = "and %s" % lst[-1]
-        return ", ".join(lst)
+from flp.common import publicLog, andlist
 
 _slugify_strip_re = re.compile(r'[^\w\s-]')
 _slugify_hyphenate_re = re.compile(r'[-\s]+')

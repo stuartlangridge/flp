@@ -45,6 +45,10 @@ class Log(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     def __unicode__(self): return u'Log message "%s"' % (self.message)
 
+class TwitterPostCount(models.Model):
+    post = models.ForeignKey(Post)
+    tweet_count_at_last_check = models.IntegerField(default=0)
+
 @receiver(post_save, sender=User, dispatch_uid="log new user creation")
 def user_saved(sender, **kwargs):
     created = kwargs.get("created")
