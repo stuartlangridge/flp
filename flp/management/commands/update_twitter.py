@@ -55,7 +55,7 @@ class Command(BaseCommand):
                     twitter.tweet_count_at_last_check = new_score
                     twitter.save()
             if message:
-                print message
+                #print message
                 publicLog(message)
                 output.append(message)
         self.stdout.write("%s scores in %s posts" % (len(output), len(posts)))
