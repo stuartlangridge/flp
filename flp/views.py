@@ -277,3 +277,5 @@ class PublicLogFeed(Feed):
     def item_title(self, item): return item.message
     def item_description(self, item): return item.message
     def item_link(self, item): return reverse("index")
+    def item_guid(self, item): return "tag:flpb.herokuapp.com,%s:%s" % (item.created_at.strftime("%Y-%m-%d"), item.id)
+    item_guid_is_permalink = False
