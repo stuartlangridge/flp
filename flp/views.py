@@ -45,7 +45,11 @@ def twitter_image(request, username):
         print "fetch from twitter"
         twitter = Twython(os.environ.get("SOCIAL_AUTH_TWITTER_KEY"), 
             access_token=os.environ.get("TWITTER_OAUTH2_ACCESS_TOKEN"))
-        image_url = twitter.show_user(screen_name=username).get("profile_image_url")
+        image_key = {
+            "http": "profile_image_url",
+            "https": "profile_image_url_https",
+        }.get(request.META.get("wsgi.url_scheme", "http"), "profile_image_url")
+        image_url = twitter.show_user(screen_name=username).get(image_key)
         cache.set(cachekey, image_url)
     return redirect(image_url)
 
