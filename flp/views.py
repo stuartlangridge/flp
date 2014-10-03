@@ -70,8 +70,7 @@ def index(request):
         from auth_user u 
         left outer join flp_user2score us on u.id=us.user_id 
         left outer join flp_score s on us.score_id=s.id
-        where s.month = %s or s.month is null
-        and s.year = %s
+        where s.month = %s and s.year = %s
         group by u.id, u.username, s.month order by total desc""", [now.month, now.year])
     highest_scorers_this_month = sorted(cursor.fetchall(), 
         cmp=lambda b,a:cmp(a[3],b[3]))[:5]
