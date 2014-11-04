@@ -151,6 +151,46 @@ def user(request, username):
             month=now.month, year=now.year),
         "userblogs": Blog.objects.filter(user2blog__user=thisuser)})
 
+def monthly(request):
+    cursor = connection.cursor()
+    cursor.execute("""select u.id, u.username, s.year, s.month, sum(s.value) as total
+        from auth_user u 
+        left outer join flp_user2score us on u.id=us.user_id 
+        left outer join flp_score s on us.score_id=s.id
+        group by u.id, u.username, s.year, s.month order by total desc""")
+    months = {}
+    for r in cursor.fetchall():
+        dt = datetime.datetime(r[2], r[3], 1)
+        dtstr = "%s-%s" % (r[3],r[2])
+        if dtstr not in months:
+            months[dtstr] = {"hasme": False, "scores":[], "date": dt}
+        months[dtstr]["scores"].append({"username": r[1], "userid": r[0], "score": r[4], "me": False})
+        if (request.user and (request.user.id == r[0])):
+            months[dtstr]["hasme"] = True
+            months[dtstr]["scores"][-1]["me"] = True
+    for m, details in months.items():
+        allm = sorted(details["scores"], cmp=lambda a,b: cmp(b["score"], a["score"]))
+        short = allm[:5]
+        count = 1
+        for s in short:
+            s["position"] = count
+            count += 1
+        if details["hasme"]:
+            me_in_short = False
+            for s in short:
+                if s["me"]: me_in_short = True
+            if not me_in_short:
+                count = 1
+                for am in allm:
+                    if am["me"]:
+                        am["position"] = count
+                        short.append(am)
+                    count += 1
+        months[m] = {"scores": short, "date": months[m]["date"]}
+    months = sorted(months.values(), cmp=lambda a,b: cmp(b["date"], a["date"]))
+
+    return render(request, "monthly.html", {"monthdata": months})
+
 def signed_in(request):
     myblogs = User2Blog.objects.filter(user=request.user)
     if myblogs.count() == 0:

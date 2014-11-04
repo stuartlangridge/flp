@@ -16,7 +16,7 @@
 </div>
 
 <div class="box">
-<h2>Top blogs this month so far</h2>
+<h2>Top blogs <a href="{% url 'monthly' %}">this month</a> so far</h2>
 <ul>
     {% for item in top_blogs_this_month %}
     <li><a href="{% url 'blog' item.post__blog__id %}">{{ item.post__blog__name }}</a> <span>{{ item.total }}</span></li>
@@ -25,7 +25,7 @@
 </div>
 
 <div class="box leadingusers">
-<h2>Leading users this month so far</h2>
+<h2>Leading users <a href="{% url 'monthly' %}">this month</a> so far</h2>
 <ul>
     {% for umc in highest_scorers_this_month %}
     <li><a href="{% url 'user' umc.1 %}"><img src="{% url 'twitter-image' umc.1 %}"> {{ umc.1 }}</a> <span>{{ umc.3|default_if_none:"0" }}</span></li>
@@ -34,7 +34,7 @@
 </div>
 
 <div class="box">
-<h2>Top blogs ever<br><small>(average score per month)</small></h2>
+<h2>Top blogs ever<br><small>(average score per <a href="{% url 'monthly' %}">month</a>)</small></h2>
 <ul>
     {% for item in top_blogs_ever %}
     <li><a href="{% url 'blog' item.1 %}">{{ item.2 }}</a> <span>{{ item.0|floatformat }}</span></li>

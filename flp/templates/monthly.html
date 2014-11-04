@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load months %}
+{% load humanize %}
+{% block title %}Monthly summaries{% endblock %}
+{% block content %}
+<h2>Winners, by month</h2>
+
+<table class="score_snippet">
+{% for mdetails in monthdata %}
+    <tr class="heading"><td colspan="4">{{ mdetails.date|date:"F Y" }}</td></tr>
+    {% for score in mdetails.scores %}
+    <tr{% if score.me %} class="me"{% endif %}>
+        <td>{{ score.position|ordinal }}</td>
+        <td>{{ score.score }}</td>
+        <td><a href="{% url 'user' score.userid %}">{{score.username}}</a></td>
+    </tr>
+    {% endfor %}
+{% endfor %}
+</table>
+{% endblock %}
+{% block style %}
+tr.heading td {
+    font-weight: bold; 
+    border: 3px solid #ccc; 
+    border-width: 3px 0; 
+    background: white;
+}
+tr.me td {
+    background: #ffd;
+}
+{% endblock %}
