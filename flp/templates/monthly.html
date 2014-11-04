@@ -12,7 +12,7 @@
     <tr{% if score.me %} class="me"{% endif %}>
         <td>{{ score.position|ordinal }}</td>
         <td>{{ score.score }}</td>
-        <td><a href="{% url 'user' score.userid %}">{{score.username}}</a></td>
+        <td><a href="{% url 'user' score.username %}">{{score.username}}</a></td>
     </tr>
     {% endfor %}
 {% endfor %}
