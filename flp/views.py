@@ -160,6 +160,7 @@ def monthly(request):
         group by u.id, u.username, s.year, s.month order by total desc""")
     months = {}
     for r in cursor.fetchall():
+        if r[2] is None and r[3] is None: continue
         dt = datetime.datetime(r[2], r[3], 1)
         dtstr = "%s-%s" % (r[3],r[2])
         if dtstr not in months:
