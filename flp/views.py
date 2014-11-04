@@ -187,7 +187,7 @@ def monthly(request):
                         am["position"] = count
                         short.append(am)
                     count += 1
-        months[m] = {"scores": short, "date": months[m]["date"]}
+        months[m] = {"scores": short, "date": months[m]["date"], "players": len(allm)}
     months = sorted(months.values(), cmp=lambda a,b: cmp(b["date"], a["date"]))
 
     return render(request, "monthly.html", {"monthdata": months})

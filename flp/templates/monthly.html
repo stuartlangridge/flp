@@ -7,7 +7,7 @@
 
 <table class="score_snippet">
 {% for mdetails in monthdata %}
-    <tr class="heading"><td colspan="4">{{ mdetails.date|date:"F Y" }}</td></tr>
+    <tr class="heading"><td colspan="4">{{ mdetails.date|date:"F Y" }} ({{mdetails.players}} player{{mdetails.players|pluralize}})</td></tr>
     {% for score in mdetails.scores %}
     <tr{% if score.me %} class="me"{% endif %}>
         <td>{{ score.position|ordinal }}</td>
